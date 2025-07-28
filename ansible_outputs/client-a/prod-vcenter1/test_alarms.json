@@ -1,0 +1,31 @@
+{
+  "alarms": [
+    {
+      "vm_name": "web-server-01",
+      "alarm_name": "High CPU Usage",
+      "alarm_description": "CPU usage is above 80% for more than 5 minutes",
+      "severity": "warning",
+      "status": "active",
+      "triggered_time": "2025-01-28T10:30:00Z",
+      "acknowledged": false
+    },
+    {
+      "vm_name": "db-server-01",
+      "alarm_name": "Low Disk Space",
+      "alarm_description": "Disk space is below 10% on C: drive",
+      "severity": "critical",
+      "status": "active",
+      "triggered_time": "2025-01-28T11:15:00Z",
+      "acknowledged": false
+    },
+    {
+      "vm_name": "app-server-01",
+      "alarm_name": "Network Connectivity",
+      "alarm_description": "Network latency above threshold",
+      "severity": "warning",
+      "status": "cleared",
+      "triggered_time": "2025-01-28T09:45:00Z",
+      "acknowledged": true
+    }
+  ]
+}

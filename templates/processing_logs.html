@@ -1,0 +1,200 @@
+{% extends "base.html" %}
+
+{% block title %}Processing Logs - vCenter Data Processor{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">
+            <i class="fas fa-file-text me-2"></i>
+            Processing Logs
+        </h1>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-list me-2"></i>
+                    Recent Log Entries
+                </h5>
+                <div>
+                    <button class="btn btn-outline-primary btn-sm" onclick="window.location.reload()">
+                        <i class="fas fa-refresh me-1"></i> Refresh
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                {% if logs.items %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th style="width: 120px;">Timestamp</th>
+                                <th style="width: 80px;">Level</th>
+                                <th style="width: 80px;">Job ID</th>
+                                <th>Message</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for log in logs.items %}
+                            <tr>
+                                <td>
+                                    <small class="text-muted">
+                                        {{ log.timestamp.strftime('%m/%d %H:%M:%S') }}
+                                    </small>
+                                </td>
+                                <td>
+                                    {% if log.level == 'ERROR' %}
+                                        <span class="badge bg-danger">{{ log.level }}</span>
+                                    {% elif log.level == 'WARNING' %}
+                                        <span class="badge bg-warning">{{ log.level }}</span>
+                                    {% elif log.level == 'INFO' %}
+                                        <span class="badge bg-info">{{ log.level }}</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">{{ log.level }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if log.job_id %}
+                                        <a href="#" onclick="showJobDetails({{ log.job_id }})" class="text-decoration-none">
+                                            {{ log.job_id }}
+                                        </a>
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <code class="text-break">{{ log.message }}</code>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Pagination -->
+                {% if logs.pages > 1 %}
+                <nav aria-label="Logs pagination">
+                    <ul class="pagination justify-content-center">
+                        {% if logs.has_prev %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('dashboard.processing_logs', page=logs.prev_num) }}">Previous</a>
+                            </li>
+                        {% endif %}
+                        
+                        {% for page_num in logs.iter_pages() %}
+                            {% if page_num %}
+                                {% if page_num != logs.page %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="{{ url_for('dashboard.processing_logs', page=page_num) }}">{{ page_num }}</a>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ page_num }}</span>
+                                    </li>
+                                {% endif %}
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link">…</span>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if logs.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('dashboard.processing_logs', page=logs.next_num) }}">Next</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+                
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-file-text fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">No log entries found</h5>
+                    <p class="text-muted">Log entries will appear here once processing begins.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Log Filtering -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="card-title mb-0">
+                    <i class="fas fa-filter me-2"></i>
+                    Log Filtering Options
+                </h6>
+            </div>
+            <div class="card-body">
+                <form method="GET" class="row g-3">
+                    <div class="col-md-3">
+                        <label for="level-filter" class="form-label">Log Level</label>
+                        <select class="form-select" id="level-filter" name="level">
+                            <option value="">All Levels</option>
+                            <option value="ERROR" {% if request.args.get('level') == 'ERROR' %}selected{% endif %}>ERROR</option>
+                            <option value="WARNING" {% if request.args.get('level') == 'WARNING' %}selected{% endif %}>WARNING</option>
+                            <option value="INFO" {% if request.args.get('level') == 'INFO' %}selected{% endif %}>INFO</option>
+                            <option value="DEBUG" {% if request.args.get('level') == 'DEBUG' %}selected{% endif %}>DEBUG</option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <label for="job-filter" class="form-label">Job ID</label>
+                        <input type="number" class="form-control" id="job-filter" name="job_id" 
+                               value="{{ request.args.get('job_id', '') }}" placeholder="Enter Job ID">
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <label for="date-filter" class="form-label">From Date</label>
+                        <input type="date" class="form-control" id="date-filter" name="from_date" 
+                               value="{{ request.args.get('from_date', '') }}">
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <label class="form-label">&nbsp;</label>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-search me-1"></i> Filter Logs
+                            </button>
+                        </div>
+                    </div>
+                </form>
+                
+                {% if request.args %}
+                <div class="mt-3">
+                    <a href="{{ url_for('dashboard.processing_logs') }}" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-times me-1"></i> Clear Filters
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Show job details function (reused from dashboard)
+function showJobDetails(jobId) {
+    // Simple implementation - could be enhanced with a modal
+    window.open(`/?job=${jobId}`, '_blank');
+}
+
+// Auto-refresh logs every 30 seconds
+setInterval(function() {
+    if (!document.hidden) {
+        window.location.reload();
+    }
+}, 30000);
+</script>
+{% endblock %}

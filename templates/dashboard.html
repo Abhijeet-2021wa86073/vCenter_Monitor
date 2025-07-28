@@ -1,0 +1,619 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - vCenter Data Processor{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">
+            <i class="fas fa-dashboard me-2"></i>
+            Processing Dashboard
+        </h1>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-4" id="statistics-cards">
+    <div class="col-md-3 mb-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title">Total Jobs</h6>
+                        <h3 class="mb-0" id="total-jobs">-</h3>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-tasks fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title">Pending</h6>
+                        <h3 class="mb-0" id="pending-jobs">-</h3>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-clock fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title">Completed</h6>
+                        <h3 class="mb-0" id="completed-jobs">-</h3>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-check-circle fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="card bg-danger text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title">Failed</h6>
+                        <h3 class="mb-0" id="failed-jobs">-</h3>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-exclamation-triangle fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Row -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-chart-pie me-2"></i>
+                    Job Status Distribution
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="jobStatusChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-chart-bar me-2"></i>
+                    Data Statistics
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6">
+                        <h4 class="text-primary" id="total-vms">-</h4>
+                        <p class="mb-0">Total VMs Processed</p>
+                    </div>
+                    <div class="col-6">
+                        <h4 class="text-warning" id="total-alarms">-</h4>
+                        <p class="mb-0">Total Alarms Processed</p>
+                    </div>
+                </div>
+                <hr>
+                <div class="row text-center">
+                    <div class="col-6">
+                        <h5 class="text-info" id="recent-jobs">-</h5>
+                        <p class="mb-0">Jobs (24h)</p>
+                    </div>
+                    <div class="col-6">
+                        <h5 class="text-success" id="success-rate">-</h5>
+                        <p class="mb-0">Success Rate</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- System Information -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-info-circle me-2"></i>
+                    System Information
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row" id="system-info">
+                    <div class="col-md-4">
+                        <h6>Watch Directory</h6>
+                        <p class="text-muted mb-1" id="watch-dir-path">-</p>
+                        <span class="badge" id="watch-dir-status">-</span>
+                        <span class="ms-2" id="watch-dir-files">- files</span>
+                    </div>
+                    <div class="col-md-4">
+                        <h6>Output Directory</h6>
+                        <p class="text-muted mb-1" id="output-dir-path">-</p>
+                        <span class="badge" id="output-dir-status">-</span>
+                        <span class="ms-2" id="output-dir-files">- files</span>
+                    </div>
+                    <div class="col-md-4">
+                        <h6>Processing Interval</h6>
+                        <p class="text-muted mb-1" id="processing-interval">-</p>
+                        <span class="badge bg-info" id="system-health">System Status</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Jobs Table -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-list me-2"></i>
+                    Recent Processing Jobs
+                </h5>
+                <div class="d-flex gap-2">
+                    <select class="form-select form-select-sm" id="status-filter">
+                        <option value="">All Status</option>
+                        <option value="pending">Pending</option>
+                        <option value="processing">Processing</option>
+                        <option value="completed">Completed</option>
+                        <option value="failed">Failed</option>
+                    </select>
+                    <select class="form-select form-select-sm" id="environment-filter">
+                        <option value="">All Environments</option>
+                    </select>
+                    <select class="form-select form-select-sm" id="client-filter">
+                        <option value="">All Clients</option>
+                    </select>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Filename</th>
+                                <th>Environment</th>
+                                <th>Client</th>
+                                <th>Status</th>
+                                <th>VMs</th>
+                                <th>Alarms</th>
+                                <th>Created</th>
+                                <th>Duration</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="jobs-table-body">
+                            <tr>
+                                <td colspan="10" class="text-center">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Pagination -->
+                <nav aria-label="Jobs pagination" id="pagination-container" style="display: none;">
+                    <ul class="pagination justify-content-center" id="pagination">
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Job Details Modal -->
+<div class="modal fade" id="jobDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Job Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="job-details-content">
+                <!-- Job details will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="retry-job-btn" style="display: none;">
+                    <i class="fas fa-redo me-1"></i> Retry Job
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Dashboard specific JavaScript
+let jobStatusChart = null;
+let currentPage = 1;
+let currentStatus = '';
+let currentEnvironment = '';
+let currentClient = '';
+
+// Initialize dashboard
+document.addEventListener('DOMContentLoaded', function() {
+    loadStatistics();
+    loadSystemInfo();
+    loadJobs();
+    
+    // Set up auto-refresh
+    setInterval(function() {
+        loadStatistics();
+        loadJobs();
+    }, 30000); // Refresh every 30 seconds
+    
+    // Set up filters
+    document.getElementById('status-filter').addEventListener('change', function() {
+        currentStatus = this.value;
+        currentPage = 1;
+        loadJobs();
+    });
+    
+    document.getElementById('environment-filter').addEventListener('change', function() {
+        currentEnvironment = this.value;
+        currentPage = 1;
+        loadJobs();
+    });
+    
+    document.getElementById('client-filter').addEventListener('change', function() {
+        currentClient = this.value;
+        currentPage = 1;
+        loadJobs();
+    });
+});
+
+// Load statistics
+function loadStatistics() {
+    fetch('/statistics')
+        .then(response => response.json())
+        .then(data => {
+            updateStatisticsCards(data);
+            updateJobStatusChart(data.job_statistics);
+        })
+        .catch(error => console.error('Error loading statistics:', error));
+}
+
+// Update statistics cards
+function updateStatisticsCards(data) {
+    const jobStats = data.job_statistics;
+    const dataStats = data.data_statistics;
+    
+    document.getElementById('total-jobs').textContent = jobStats.total;
+    document.getElementById('pending-jobs').textContent = jobStats.pending;
+    document.getElementById('completed-jobs').textContent = jobStats.completed;
+    document.getElementById('failed-jobs').textContent = jobStats.failed;
+    
+    document.getElementById('total-vms').textContent = dataStats.total_vms.toLocaleString();
+    document.getElementById('total-alarms').textContent = dataStats.total_alarms.toLocaleString();
+    document.getElementById('recent-jobs').textContent = dataStats.recent_jobs_24h;
+    document.getElementById('success-rate').textContent = jobStats.success_rate + '%';
+    
+    // Update filter dropdowns
+    updateFilterDropdowns(data.environment_statistics, data.client_statistics);
+}
+
+// Update filter dropdowns
+function updateFilterDropdowns(environmentStats, clientStats) {
+    const envFilter = document.getElementById('environment-filter');
+    const clientFilter = document.getElementById('client-filter');
+    
+    // Clear existing options (except "All")
+    envFilter.innerHTML = '<option value="">All Environments</option>';
+    clientFilter.innerHTML = '<option value="">All Clients</option>';
+    
+    // Add environment options
+    environmentStats.forEach(env => {
+        const option = document.createElement('option');
+        option.value = env.environment;
+        option.textContent = `${env.environment} (${env.job_count} jobs, ${env.vm_count} VMs)`;
+        envFilter.appendChild(option);
+    });
+    
+    // Add client options
+    clientStats.forEach(client => {
+        const option = document.createElement('option');
+        option.value = client.client;
+        option.textContent = `${client.client} (${client.job_count} jobs, ${client.vm_count} VMs)`;
+        clientFilter.appendChild(option);
+    });
+}
+
+// Update job status chart
+function updateJobStatusChart(jobStats) {
+    const ctx = document.getElementById('jobStatusChart').getContext('2d');
+    
+    if (jobStatusChart) {
+        jobStatusChart.destroy();
+    }
+    
+    jobStatusChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Completed', 'Failed', 'Pending', 'Processing'],
+            datasets: [{
+                data: [jobStats.completed, jobStats.failed, jobStats.pending, jobStats.processing],
+                backgroundColor: ['#28a745', '#dc3545', '#17a2b8', '#ffc107'],
+                borderWidth: 2,
+                borderColor: '#495057'
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+}
+
+// Load system information
+function loadSystemInfo() {
+    fetch('/system-info')
+        .then(response => response.json())
+        .then(data => {
+            const dirs = data.directories;
+            const config = data.configuration;
+            
+            // Watch directory
+            document.getElementById('watch-dir-path').textContent = dirs.watch_directory.path;
+            document.getElementById('watch-dir-status').textContent = dirs.watch_directory.exists ? 'Accessible' : 'Not Found';
+            document.getElementById('watch-dir-status').className = 'badge ' + (dirs.watch_directory.exists ? 'bg-success' : 'bg-danger');
+            document.getElementById('watch-dir-files').textContent = dirs.watch_directory.file_count + ' files';
+            
+            // Output directory
+            document.getElementById('output-dir-path').textContent = dirs.output_directory.path;
+            document.getElementById('output-dir-status').textContent = dirs.output_directory.exists ? 'Accessible' : 'Not Found';
+            document.getElementById('output-dir-status').className = 'badge ' + (dirs.output_directory.exists ? 'bg-success' : 'bg-danger');
+            document.getElementById('output-dir-files').textContent = dirs.output_directory.file_count + ' files';
+            
+            // Processing interval
+            document.getElementById('processing-interval').textContent = config.processing_interval_minutes + ' minutes';
+        })
+        .catch(error => console.error('Error loading system info:', error));
+}
+
+// Load jobs
+function loadJobs() {
+    const params = new URLSearchParams({
+        page: currentPage,
+        per_page: 10
+    });
+    
+    if (currentStatus) {
+        params.append('status', currentStatus);
+    }
+    if (currentEnvironment) {
+        params.append('environment', currentEnvironment);
+    }
+    if (currentClient) {
+        params.append('client', currentClient);
+    }
+    
+    fetch('/jobs?' + params.toString())
+        .then(response => response.json())
+        .then(data => {
+            updateJobsTable(data.jobs);
+            updatePagination(data.pagination);
+        })
+        .catch(error => console.error('Error loading jobs:', error));
+}
+
+// Update jobs table
+function updateJobsTable(jobs) {
+    const tbody = document.getElementById('jobs-table-body');
+    
+    if (jobs.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="10" class="text-center text-muted">No jobs found</td></tr>';
+        return;
+    }
+    
+    tbody.innerHTML = jobs.map(job => {
+        const statusBadge = getStatusBadge(job.status);
+        const createdAt = job.created_at ? new Date(job.created_at).toLocaleString() : '-';
+        const duration = job.processing_time_seconds ? 
+            Math.round(job.processing_time_seconds) + 's' : '-';
+        
+        return `
+            <tr>
+                <td>${job.id}</td>
+                <td title="${job.filename}">${truncateText(job.filename, 25)}</td>
+                <td><span class="badge bg-secondary">${job.vcenter_environment || 'N/A'}</span></td>
+                <td><span class="badge bg-info">${job.client_name || 'N/A'}</span></td>
+                <td>${statusBadge}</td>
+                <td>${job.vm_count || 0}</td>
+                <td>${job.alarm_count || 0}</td>
+                <td>${createdAt}</td>
+                <td>${duration}</td>
+                <td>
+                    <button class="btn btn-sm btn-outline-primary" onclick="showJobDetails(${job.id})">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    ${job.output_files && job.output_files.length > 0 ? 
+                        '<button class="btn btn-sm btn-outline-success ms-1" onclick="showDownloads(' + job.id + ')"><i class="fas fa-download"></i></button>' : 
+                        ''
+                    }
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+// Get status badge
+function getStatusBadge(status) {
+    const badges = {
+        'pending': '<span class="badge bg-info">Pending</span>',
+        'processing': '<span class="badge bg-warning">Processing</span>',
+        'completed': '<span class="badge bg-success">Completed</span>',
+        'failed': '<span class="badge bg-danger">Failed</span>'
+    };
+    return badges[status] || '<span class="badge bg-secondary">Unknown</span>';
+}
+
+// Truncate text
+function truncateText(text, length) {
+    return text.length > length ? text.substring(0, length) + '...' : text;
+}
+
+// Update pagination
+function updatePagination(pagination) {
+    const container = document.getElementById('pagination-container');
+    const paginationElement = document.getElementById('pagination');
+    
+    if (pagination.pages <= 1) {
+        container.style.display = 'none';
+        return;
+    }
+    
+    container.style.display = 'block';
+    
+    let paginationHTML = '';
+    
+    // Previous button
+    if (pagination.has_prev) {
+        paginationHTML += `<li class="page-item"><a class="page-link" href="#" onclick="changePage(${pagination.page - 1})">Previous</a></li>`;
+    }
+    
+    // Page numbers
+    for (let i = 1; i <= pagination.pages; i++) {
+        const isActive = i === pagination.page ? 'active' : '';
+        paginationHTML += `<li class="page-item ${isActive}"><a class="page-link" href="#" onclick="changePage(${i})">${i}</a></li>`;
+    }
+    
+    // Next button
+    if (pagination.has_next) {
+        paginationHTML += `<li class="page-item"><a class="page-link" href="#" onclick="changePage(${pagination.page + 1})">Next</a></li>`;
+    }
+    
+    paginationElement.innerHTML = paginationHTML;
+}
+
+// Change page
+function changePage(page) {
+    currentPage = page;
+    loadJobs();
+}
+
+// Show job details
+function showJobDetails(jobId) {
+    fetch(`/api/job/${jobId}/status`)
+        .then(response => response.json())
+        .then(job => {
+            const modal = new bootstrap.Modal(document.getElementById('jobDetailsModal'));
+            const content = document.getElementById('job-details-content');
+            const retryBtn = document.getElementById('retry-job-btn');
+            
+            content.innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Basic Information</h6>
+                        <table class="table table-sm">
+                            <tr><td><strong>ID:</strong></td><td>${job.id}</td></tr>
+                            <tr><td><strong>Filename:</strong></td><td>${job.filename}</td></tr>
+                            <tr><td><strong>Status:</strong></td><td>${getStatusBadge(job.status)}</td></tr>
+                            <tr><td><strong>Created:</strong></td><td>${job.created_at ? new Date(job.created_at).toLocaleString() : '-'}</td></tr>
+                            <tr><td><strong>Started:</strong></td><td>${job.started_at ? new Date(job.started_at).toLocaleString() : '-'}</td></tr>
+                            <tr><td><strong>Completed:</strong></td><td>${job.completed_at ? new Date(job.completed_at).toLocaleString() : '-'}</td></tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Processing Results</h6>
+                        <table class="table table-sm">
+                            <tr><td><strong>VMs Processed:</strong></td><td>${job.vm_count || 0}</td></tr>
+                            <tr><td><strong>Alarms Processed:</strong></td><td>${job.alarm_count || 0}</td></tr>
+                            <tr><td><strong>Output Files:</strong></td><td>${job.output_files ? job.output_files.length : 0}</td></tr>
+                        </table>
+                        
+                        ${job.error_message ? `
+                            <h6>Error Details</h6>
+                            <div class="alert alert-danger">
+                                <small>${job.error_message}</small>
+                            </div>
+                        ` : ''}
+                        
+                        ${job.output_files && job.output_files.length > 0 ? `
+                            <h6>Output Files</h6>
+                            <ul class="list-group list-group-flush">
+                                ${job.output_files.map(file => `
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <span>${file.split('/').pop()}</span>
+                                        <a href="/download/${job.id}/${file.split('/').pop()}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-download"></i>
+                                        </a>
+                                    </li>
+                                `).join('')}
+                            </ul>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+            
+            // Show retry button for failed jobs
+            if (job.status === 'failed') {
+                retryBtn.style.display = 'inline-block';
+                retryBtn.onclick = () => retryJob(job.id);
+            } else {
+                retryBtn.style.display = 'none';
+            }
+            
+            modal.show();
+        })
+        .catch(error => {
+            console.error('Error loading job details:', error);
+            alert('Error loading job details');
+        });
+}
+
+// Retry job
+function retryJob(jobId) {
+    fetch(`/api/job/${jobId}/retry`, {
+        method: 'POST'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.message) {
+            alert(data.message);
+            loadJobs();
+            bootstrap.Modal.getInstance(document.getElementById('jobDetailsModal')).hide();
+        } else {
+            alert('Error retrying job');
+        }
+    })
+    .catch(error => {
+        console.error('Error retrying job:', error);
+        alert('Error retrying job');
+    });
+}
+</script>
+{% endblock %}

@@ -1,0 +1,28 @@
+{
+  "processing_summary": {
+    "job_id": 1,
+    "processed_at": "2025-07-28T10:22:30.179976",
+    "total_vms": 3,
+    "total_alarms": 0
+  },
+  "vm_statistics": {
+    "total_count": 3,
+    "power_state_distribution": {
+      "poweredon": 3
+    },
+    "average_cpu_count": 6.0,
+    "average_memory_gb": 12.0,
+    "total_disk_gb": 850.5,
+    "guest_os_distribution": {
+      "CentOS 8": 1,
+      "Windows Server 2019": 1,
+      "Ubuntu 20.04": 1
+    }
+  },
+  "alarm_statistics": {},
+  "metadata": {
+    "parsed_at": "2025-07-28T10:22:29.832057",
+    "total_vms": 3,
+    "total_alarms": 0
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "vms": [
+    {
+      "name": "web-server-01",
+      "uuid": "50322a7e-8f9a-4b5c-9d6e-1f2a3b4c5d6e",
+      "power_state": "poweredOn",
+      "cpu_count": 4,
+      "memory_mb": 8192,
+      "disk_gb": 100.5,
+      "network_count": 2,
+      "guest_os": "CentOS 8",
+      "host_name": "esxi-host-01.company.com",
+      "cluster_name": "Production-Cluster",
+      "datacenter_name": "Primary-DC"
+    },
+    {
+      "name": "db-server-01",
+      "uuid": "60433b8f-9a0b-5c6d-ae7f-2g3h4i5j6k7l",
+      "power_state": "poweredOn",
+      "cpu_count": 8,
+      "memory_mb": 16384,
+      "disk_gb": 500.0,
+      "network_count": 1,
+      "guest_os": "Windows Server 2019",
+      "host_name": "esxi-host-02.company.com",
+      "cluster_name": "Production-Cluster",
+      "datacenter_name": "Primary-DC"
+    },
+    {
+      "name": "app-server-01",
+      "uuid": "70544c9g-a1c2-6d7e-bf8g-3h4i5j6k7l8m",
+      "power_state": "poweredOn",
+      "cpu_count": 6,
+      "memory_mb": 12288,
+      "disk_gb": 250.0,
+      "network_count": 3,
+      "guest_os": "Ubuntu 20.04",
+      "host_name": "esxi-host-03.company.com",
+      "cluster_name": "Production-Cluster",
+      "datacenter_name": "Primary-DC"
+    }
+  ]
+}
